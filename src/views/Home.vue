@@ -1,18 +1,39 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    {{ error }}
+    {{ db }}
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
 
 export default {
-  name: 'home',
-  components: {
-    HelloWorld
-  }
+  name: 'Home',
+
+  computed: {
+    db () {
+      return this.$db
+    }
+  },
+
+  data () {
+    return {
+      error: 'blank'
+    }
+  }// ,
+
+  // mounted () {
+  //   this.$db.rooms.createRoom({ meme: 'meme' })
+  //     .then(() => {
+  //       this.error = 'none'
+  //     })
+  //     .catch(e => {
+  //       this.error = e
+  //     })
+  // }
 }
 </script>
+
+<style lang="scss" scoped>
+
+</style>

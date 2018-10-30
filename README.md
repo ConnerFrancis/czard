@@ -15,21 +15,21 @@ A little project that's like an online Cards Against Humanity.
 
 ### Running the project
 If you'd like to run the very little amount of content this project has to offer:
-```
+```sh
 npm install # install necessary components
 ```
 
 To run a development version:
-```
+```sh
 npm run serve # locally hosted and hot-reloaded development environment
 ```
 
 To build a production version:
-```
+```sh
 npm run build # its in the name dude
 ```
 
 Lint my garbage code:
-```
+```sh
 npm run lint # uses the js standard format
 ```
