@@ -1,13 +1,17 @@
-/**
- * Database
- *
- * Initialize database and store data.
- */
+import firebase from 'firebase'
 
-// API imports
-import rooms from './rooms'
+firebase.initializeApp({
+  apiKey: 'AIzaSyBb3bkrYkEd3b9B4O4g-o7-hwF8Wr_8rpc',
+  authDomain: 'czard-db.firebaseapp.com',
+  databaseURL: 'https://czard-db.firebaseio.com',
+  projectId: 'czard-db',
+  storageBucket: '',
+  messagingSenderId: '921443101176'
+})
 
-// Stores all API methods and such
-export default {
-  rooms
-}
+const db = firebase.firestore()
+db.settings({
+  timestampsInSnapshots: true
+})
+
+export default db
