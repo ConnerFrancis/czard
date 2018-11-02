@@ -20,11 +20,10 @@ export default {
     newToast () {
       this.$store.dispatch('toast/add', {
         type: 'info',
-        code: null,
-        message: 'yo'
+        code: null
       })
         .catch(e => {
-          this.error = { code: e.code, message: e.message }
+          this.error = e.message
         })
     }
   }

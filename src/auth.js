@@ -4,8 +4,6 @@
  * Automatically signs in to an anonymous account or a real account.
  */
 
-import { OperationError } from './error'
-
 import firebase from 'firebase'
 import store from './store'
 
@@ -13,12 +11,15 @@ import store from './store'
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     if (user.isAnonymous) {
+      // Obviously log the user in
       store.dispatch('currentUser/loginAnonymously', user)
-      store.dispatch('toast/add', {
-        type: 'success',
-        code: null,
-        message: 'Logged in to anonymous account (' + user.id + ').'
-      })
+      // Different messages if the name is not blank
+      if (user.displayName) {
+        store.dispatch('toast/add', {
+          type: 'success',
+          message: 'Welcome back, ' + user.displayName + '.'
+        })
+      }
     } else {
       store.dispatch('toast/add', {
         type: 'success',
@@ -30,16 +31,12 @@ firebase.auth().onAuthStateChanged(user => {
     // user.id etc etc
   } else {
     firebase.auth().signInAnonymously()
-      .then(user => {
-        store.dispatch('currentUser/loginAnonymously', user)
-        store.dispatch('toast/add', {
-          type: 'success',
-          code: null,
-          message: 'Logged in anonymously.'
-        })
-      })
       .catch(e => {
-        throw new OperationError('auth/anonymous-failed', 'Signing in anonymously failed.')
+        store.dispatch('toast/add', {
+          type: 'error',
+          code: 'auth/failed-anonymous-login',
+          message: 'Failed to sign in anonymously.'
+        })
       })
   }
 })

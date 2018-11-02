@@ -1,4 +1,4 @@
-import { OperationError } from '@/error'
+import Vue from 'vue'
 
 import {
   ADD,
@@ -18,22 +18,28 @@ const state = {
 const mutations = {
 
   [ADD] (state, payload) {
-    // Add a new toast
-    state.toasts[state.lastId + 1] = payload
+    if (payload.message == null) {
+      // I can throw literals WHENEVER I WANT THE FUTURE IS NOW OLD MAN
+      // eslint-disable-next-line
+      throw ({ code: 'toast/add/invalid-message', message: 'Message is invalid or does not exist.' })
+    }
+    // We need to use Vue.set, since Vue cannot detect
+    // normal object key changes
+    Vue.set(state.toasts, state.lastId + 1, payload)
     // Increase the last id
     state.lastId += 1
   },
 
   [DEPRECATE] (state, id) {
     // Append the toast to the deprecated list
-    state.deprecated[id] = state.toasts[id]
+    Vue.set(state.deprecated, id, state.toasts[id])
     // Delete the toast from the fresh list
-    delete state.toasts[id]
+    Vue.delete(state.toasts, id)
   },
 
   [REMOVE] (state, id) {
-    delete state.toasts[id]
-    delete state.deprecated[id]
+    Vue.delete(state.toasts, id)
+    Vue.delete(state.deprecated, id)
   }
 
 }
@@ -46,16 +52,10 @@ const actions = {
    * @param payload: { type, code, message }
    */
   async add (context, payload) {
-    /*
-    if (!payload.message) {
-      throw new OperationError('store/toast/add/no-message', 'Failed to add toast with code ' + payload.code + '.')
-    }
-    */
-
     try {
       context.commit(ADD, payload)
     } catch (e) {
-      throw new OperationError(e.code, e.message)
+      throw e
     }
   },
 

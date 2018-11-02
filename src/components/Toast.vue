@@ -1,14 +1,15 @@
 <template>
   <div class="toast">
-    {{ toasts }}
     <div
-      v-for="toast in toasts"
-      :key="toast"
-      :class="toast.type"
+      v-for="(value, key) in toasts"
+      :key="key"
+      :class="value.type"
+      @click="deprecate(key)"
     >
-      <span v-if="toast.type" class="type">{{ toast.type }}</span>
-      <span v-if="toast.code" class="code"> {{ toast.code }}</span>
-      <span class="message"> {{ toast.message }}</span>
+      <span v-if="value.type" class="type"></span>
+      <span v-if="value.code" class="code">{{ value.code }}</span>
+      <span class="message" v-if="value.html" v-html="value.message"></span>
+      <span class="message" v-else>{{ value.message }}</span>
     </div>
   </div>
 </template>
@@ -21,8 +22,15 @@ export default {
 
   computed: {
     ...mapState({
-      toasts: state => state.toast.toasts
+      toasts: state => state.toast.toasts,
+      deprecated: state => state.toast.deprecated
     })
+  },
+
+  methods: {
+    deprecate (id) {
+      this.$store.dispatch('toast/deprecate', id)
+    }
   }
 }
 </script>

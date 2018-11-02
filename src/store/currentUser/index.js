@@ -13,7 +13,7 @@ const mutations = {
 }
 
 const actions = {
-  loginAnonymously (context, user) {
+  async loginAnonymously (context, user) {
     context.commit(LOGIN, user)
   }
 }
