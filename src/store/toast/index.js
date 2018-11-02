@@ -46,12 +46,14 @@ const actions = {
    * @param payload: { type, code, message }
    */
   async add (context, payload) {
+    /*
     if (!payload.message) {
       throw new OperationError('store/toast/add/no-message', 'Failed to add toast with code ' + payload.code + '.')
     }
+    */
 
     try {
-      await context.commit(ADD, payload)
+      context.commit(ADD, payload)
     } catch (e) {
       throw new OperationError(e.code, e.message)
     }

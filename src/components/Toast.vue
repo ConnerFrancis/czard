@@ -1,5 +1,6 @@
 <template>
   <div class="toast">
+    {{ toasts }}
     <div
       v-for="toast in toasts"
       :key="toast"

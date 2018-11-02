@@ -2,13 +2,12 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import api from './db/api'
 import db from './db'
+import api from './db/api'
 
-import './auth'
-
-Vue.prototype.$api = api
 Vue.prototype.$db = db
+// eslint-disable-next-line
+;Vue.prototype.$api = api
 
 Vue.config.productionTip = false
 
