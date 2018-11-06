@@ -9,6 +9,8 @@ firebase.initializeApp({
   messagingSenderId: '921443101176'
 })
 
+export const realtimeDb = firebase.database()
+
 const db = firebase.firestore()
 db.settings({
   timestampsInSnapshots: true

@@ -29,17 +29,12 @@ exports.onUserStatusChanged = functions.database
   .ref('/status/{userId}')
   .onUpdate(event => {
     return event.data.ref.once('value')
-      .then(statusSnapshot => snapShot.val()) // Grab the status
-      .then(status => {
-        // If the realtime db user is offline, set the corresponding
-        // firestore user to offline as well
-        // eslint-disable-next-line
-        if (status === 'offline') {
-          firestore.collection('/users')
-            .doc(event.params.userId)
-            .set({
-              online: false
-            }, { merge: true })
-        }
+      .then(snapshot => {
+        // Literally just link the values lol
+        return firestore.collection('/users')
+          .doc(event.params.userId)
+          .set({
+            online: !(snapshot.val() === 'offline')
+          }, { merge: true })
       })
   })

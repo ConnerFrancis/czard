@@ -1,3 +1,5 @@
+import { realtimeDb } from '@/db'
+
 import {
   LOGIN
 } from './mutations'
@@ -28,6 +30,7 @@ const actions = {
       anonymous: false
     }, { merge: true })
     */
+    realtimeDb.ref('/status/blah').set('online')
     context.commit(LOGIN, user)
   }
 }
