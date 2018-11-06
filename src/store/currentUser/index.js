@@ -3,17 +3,31 @@ import {
 } from './mutations'
 
 const state = {
-  data: {}
+  // Holds init login data
+  data: {},
+  loggedIn: false
 }
 
 const mutations = {
+  /**
+   * Set the state and nothing more
+   */
   [LOGIN] (state, user) {
     state.data = user
+    state.loggedIn = true
   }
 }
 
 const actions = {
-  async loginAnonymously (context, user) {
+  /**
+   * Commit and login
+   */
+  async login (context, user) {
+    /*
+    db.collection('users').doc(user.uid).set({
+      anonymous: false
+    }, { merge: true })
+    */
     context.commit(LOGIN, user)
   }
 }
