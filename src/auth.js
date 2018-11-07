@@ -6,8 +6,9 @@
 
 import firebase from 'firebase'
 import store from './store'
+import { realtimeDb } from '@/db'
 
-// Sign in or anonymously sign in otherwise
+// Handle auth state automagically
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     if (user.isAnonymous) {
@@ -21,7 +22,7 @@ firebase.auth().onAuthStateChanged(user => {
       store.dispatch('currentUser/login', user)
       store.dispatch('toast/add', {
         type: 'success',
-        message: 'Logged in to account ' + user.id + '.'
+        message: 'Logged in to account ' + user.uid + '.'
       })
     }
   } else {
@@ -30,8 +31,24 @@ firebase.auth().onAuthStateChanged(user => {
         store.dispatch('toast/add', {
           type: 'error',
           code: 'auth/failed-anonymous-login',
-          message: 'Failed to sign in anonymously.'
+          message: 'Failed to sign in anonymously (' + e.message + ').'
         })
       })
   }
+})
+
+// Handle user presence
+realtimeDb.ref('.info/connected').on('value', (snapshot) => {
+  var status = realtimeDb.ref('/status/' + firebase.auth().currentUser.uid)
+
+  // If there is no connection don't do anything
+  // eslint-disable-next-line
+  if (snapshot.val() == false) return
+
+  status
+    .onDisconnect()
+    .set('offline')
+    .then(() => {
+      status.set('online')
+    })
 })

@@ -25,16 +25,12 @@ exports.cleanRooms = functions.firestore
 /**
  * When a user's status changes in the realtime db
  */
-exports.onUserStatusChanged = functions.database
+exports.userStatusLink = functions.database
   .ref('/status/{userId}')
-  .onUpdate(event => {
-    return event.data.ref.once('value')
-      .then(snapshot => {
-        // Literally just link the values lol
-        return firestore.collection('/users')
-          .doc(event.params.userId)
-          .set({
-            online: !(snapshot.val() === 'offline')
-          }, { merge: true })
-      })
+  .onWrite(( change, context ) => {
+    firestore.collection('users')
+      .doc(context.params.userId)
+      .set({
+        online: !(change.after.val() === 'offline')
+      }, { merge: true })
   })
