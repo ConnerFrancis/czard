@@ -1,30 +1,21 @@
 <template>
   <div class="home">
-    hey fbi go away
-    {{ error }}
-    <a @click="newToast">add toast</a>
+    <rooms-list />
   </div>
 </template>
 
 <script>
+import RoomsList from '@/components/rooms/RoomsList.vue'
+
 export default {
   name: 'Home',
 
-  data () {
-    return {
-      error: 'none m8'
-    }
+  components: {
+    'rooms-list': RoomsList
   },
 
-  methods: {
-    newToast () {
-      this.$store.dispatch('toast/add', {
-        type: 'info',
-        code: null
-      })
-        .catch(e => {
-          this.error = e.message
-        })
+  data () {
+    return {
     }
   }
 }

@@ -2,6 +2,9 @@ const functions = require('firebase-functions')
 const Firestore = require('@google-cloud/firestore')
 
 const firestore = new Firestore()
+firestore.settings({
+  timestampsInSnapshots: true
+})
 
 /**
  * Cleans all rooms that have no players
@@ -28,9 +31,10 @@ exports.cleanRooms = functions.firestore
 exports.userStatusLink = functions.database
   .ref('/status/{userId}')
   .onWrite(( change, context ) => {
-    firestore.collection('users')
+    return firestore.collection('users')
       .doc(context.params.userId)
       .set({
-        online: !(change.after.val() === 'offline')
+        online: (change.after.val() === 'online'),
+        lastSeen: Firestore.FieldValue.serverTimestamp()
       }, { merge: true })
   })

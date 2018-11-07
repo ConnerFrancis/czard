@@ -6,6 +6,7 @@
  */
 
 import Home from '@/views/Home'
+import Room from '@/views/Room'
 
 // Views all listed in @/views
 const root = [
@@ -13,6 +14,11 @@ const root = [
     path: '/',
     name: 'home',
     component: Home
+  },
+  {
+    path: '/room/:id',
+    name: 'room',
+    component: Room
   }
 ]
 

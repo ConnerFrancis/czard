@@ -1,3 +1,5 @@
+import db from '@/db'
+
 import {
   LOGIN
 } from './mutations'
@@ -23,6 +25,10 @@ const actions = {
    * Commit and login
    */
   async login (context, user) {
+    db.collection('users').doc(user.uid)
+      .set({
+        anonymous: user.isAnonymous
+      }, { merge: true })
     context.commit(LOGIN, user)
   }
 }
