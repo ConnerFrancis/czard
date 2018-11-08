@@ -9,14 +9,15 @@
     >
       <span class="name">{{ room.name }}</span>
       <span class="players">{{ room.players.length }} <template v-if="room.players.length == 1">player</template><template v-else>players</template></span>
-      <button>Join</button>
-      <button>Spectate</button>
+      <button @click="joinRoom(key, true)">Join</button>
+    <button @click="joinRoom(key, false)">Spectate</button>
     </div>
   </div>
 </template>
 
 <script>
 import Vue from 'vue'
+import firebase from 'firebase'
 import db from '@/db'
 
 export default {
@@ -25,6 +26,21 @@ export default {
   data () {
     return {
       rooms: {}
+    }
+  },
+
+  methods: {
+    joinRoom (id, isPlayer) {
+      // Only add to the players if u wanna
+      if (isPlayer) {
+        db.collection('rooms')
+          .doc(id)
+          .update({
+            players: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
+          })
+      }
+
+      this.$router.push('/room/' + id)
     }
   },
 
