@@ -1,5 +1,5 @@
 export default {
-  author: 'USERID',
+  host: 'USERID',
   decks: ['DECKID', 'DECKID'],
   name: 'ROOMDISPLAYNAME',
   players: [

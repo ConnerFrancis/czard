@@ -8,6 +8,8 @@
 import Home from '@/views/Home'
 import Room from '@/views/Room'
 
+import Users from '@/views/Users'
+
 // Views all listed in @/views
 const root = [
   {
@@ -19,6 +21,11 @@ const root = [
     path: '/room/:id',
     name: 'room',
     component: Room
+  },
+  {
+    path: '/users',
+    name: 'users',
+    component: Users
   }
 ]
 

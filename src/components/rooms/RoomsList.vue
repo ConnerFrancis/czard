@@ -18,7 +18,6 @@
 <script>
 import Vue from 'vue'
 import firebase from 'firebase'
-import db from '@/db'
 
 export default {
   name: 'RoomsList',
@@ -33,7 +32,7 @@ export default {
     joinRoom (id, isPlayer) {
       // Only add to the players if u wanna
       if (isPlayer) {
-        db.collection('rooms')
+        this.$db.collection('rooms')
           .doc(id)
           .update({
             players: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
@@ -45,7 +44,7 @@ export default {
   },
 
   mounted () {
-    db.collection('rooms')
+    this.$db.collection('rooms')
       .onSnapshot(snapshot => {
         // Reset in case a doc is deleted
         this.rooms = {}
