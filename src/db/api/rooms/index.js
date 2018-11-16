@@ -3,15 +3,17 @@
  */
 
 import Vue from 'vue'
+import firebase from 'firebase'
 import db from '@/db'
 
-const ref = db.collection('rooms')
+const rooms = db.collection('rooms')
+const users = db.collection('users')
 
 const getters = {
   all () {
     let rooms = {}
 
-    ref
+    rooms
       .get()
       .then(snapshot => {
         snapshot.forEach(doc => {
@@ -27,18 +29,57 @@ const setters = {
   /**
    * Create a new room
    *
-   * @return: doc.id
+   * @return room.id
    */
-  async createRoom (data) {
-    return ref.add(data)
+  async createRoom (title, decks, owner) {
+    // Remove the owner from the room they are in
+    users.doc(owner)
+      .get()
       .then(doc => {
-        console.log('#db.rooms.createRoom()# Room with id [' + doc.id + '] created.')
-        // Catch the id with a promise
+        rooms.doc(doc.data().room)
+          .update({
+            players: firebase.firestore.FieldValue.arrayRemove(doc.id)
+          })
+      })
+
+    // Create a room and set the user to be in it
+    return rooms.add({ title, decks, owner, players: [owner] })
+      .then(doc => {
+        users.doc(owner)
+          .update({
+            room: doc.id
+          })
         return doc.id
       })
-      .catch(e => {
-        throw e
+  },
+
+  /**
+   * Join an existing room
+   *
+   * @return room.id
+   */
+  async joinRoom (user, newRoom) {
+    const batch = db.batch()
+    const oldRoom = await users.doc(user)
+      .get()
+      .then(doc => {
+        return doc.data().room
       })
+
+    if (oldRoom) {
+      batch.update(rooms.doc(oldRoom), {
+        players: firebase.firestore.FieldValue.arrayRemove(user)
+      })
+    }
+    batch.update(rooms.doc(newRoom), {
+      players: firebase.firestore.FieldValue.arrayUnion(user)
+    })
+    batch.update(users.doc(user), {
+      room: newRoom
+    })
+
+    return batch.commit()
+      .then(() => newRoom)
   }
 }
 

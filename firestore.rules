@@ -1,0 +1,45 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function auth() {
+      return request.auth.uid != null;
+    }
+    // Test if data is filled
+    function stringFilled(s) {
+      return s.split('').join('') != ''
+             && s.split('').join('') != null;
+    }
+    function arrayFilled(a) {
+      return a.size() > 0
+             && a != null
+             && a != [];
+    }
+
+    ///////////
+    // Rooms //
+    ///////////
+    match /rooms/{room} {
+      allow read: if auth();
+      // Update cases:
+      allow update: if auth()
+                    && request.resource.data.players.size() <= 16 // Max players 16
+                    && request.resource.data.title.size() <= 100 // Max title of 100 characters
+                    && request.resource.data.owner == resource.data.owner // Owner hasn't changed
+                    && request.resource.data.title == resource.data.title // Title hasn't changed
+                    && request.resource.data.decks == resource.data.decks; // Decks haven't changed
+      allow create: if auth()
+                    && stringFilled(request.resource.data.title) // Title exists
+                    && arrayFilled(request.resource.data.decks) // Decks are chosen
+                    && request.resource.data.players.size() <= 16 // Max players 16
+                    && request.resource.data.title.size() <= 100; // Max title of 100 characters
+      allow delete: if request.auth.uid == resource.data.owner;
+    }
+
+    ///////////
+    // Users //
+    ///////////
+    match /users/{user} {
+      allow read: if auth();
+      allow write: if request.auth.uid == user;
+    }
+  }
+}

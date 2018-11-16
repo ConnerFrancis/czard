@@ -8,6 +8,8 @@ import firebase from 'firebase'
 import store from './store'
 import { realtimeDb } from '@/db'
 
+const auth = firebase.auth()
+
 // Handle auth state automagically
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
@@ -39,7 +41,7 @@ firebase.auth().onAuthStateChanged(user => {
 
 // Handle user presence
 realtimeDb.ref('.info/connected').on('value', (snapshot) => {
-  var status = realtimeDb.ref('/status/' + firebase.auth().currentUser.uid)
+  var status = realtimeDb.ref('/status/' + auth.currentUser.uid)
 
   // If there is no connection don't do anything
   // eslint-disable-next-line
@@ -52,3 +54,5 @@ realtimeDb.ref('.info/connected').on('value', (snapshot) => {
       status.set('online')
     })
 })
+
+export default auth

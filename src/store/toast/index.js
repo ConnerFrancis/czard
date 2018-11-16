@@ -65,6 +65,18 @@ const actions = {
 
   async remove (context, id) {
     context.commit(REMOVE, id)
+  },
+
+  async error (context, e) {
+    try {
+      context.commit(ADD, {
+        type: 'error',
+        code: e.code,
+        message: e.message
+      })
+    } catch (e) {
+      throw e
+    }
   }
 
 }

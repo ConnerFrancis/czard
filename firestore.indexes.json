@@ -1,0 +1,22 @@
+{
+  "indexes": [
+    {
+      "collectionId": "users",
+      "state": "READY",
+      "fields": [
+        {
+          "fieldPath": "anonymous",
+          "mode": "ASCENDING"
+        },
+        {
+          "fieldPath": "online",
+          "mode": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastSeen",
+          "mode": "ASCENDING"
+        }
+      ]
+    }
+  ]
+}

@@ -27,6 +27,8 @@ const actions = {
   async login (context, user) {
     db.collection('users').doc(user.uid)
       .set({
+        online: true,
+        lastSeen: Math.floor(Date.now()),
         anonymous: user.isAnonymous
       }, { merge: true })
     context.commit(LOGIN, user)

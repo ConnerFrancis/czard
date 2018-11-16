@@ -36,5 +36,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.toast {
+  /* Display */
+  position: fixed;
+  z-index: 2;
+}
 </style>

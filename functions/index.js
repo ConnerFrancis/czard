@@ -6,11 +6,17 @@ const promisePool = require('es6-promise-pool')
 const PromisePool = promisePool.PromisePool
 const secureCompare = require('secure-compare')
 
+var FieldValue = require('firebase-admin').firestore.FieldValue
+
 const db = admin.firestore()
 const firebase = admin.database()
 db.settings({
   timestampsInSnapshots: true
 })
+
+const rooms = db.collection('rooms')
+const users = db.collection('users')
+const decks = db.collection('decks')
 
 /**
  * Cleansing data
@@ -79,23 +85,22 @@ exports.cleanseUsers = functions.https.onRequest((req, res) => {
  */
 
 async function getActivePlayers (players) {
-  let activePlayers = []
+  const activePlayers = []
   for (let player of players) {
     // eslint-disable-next-line
     let snapshot = await firebase.ref('/status/' + player).once('value')
-    console.log(snapshot.val())
     if (snapshot.val() === 'online') activePlayers.push(player)
   }
   return activePlayers
 }
 
+// TODO: deprecate this intesive function. no bueno amigo
+//       - or use cronjob to run like every 8 hours idk
 exports.cleanseRooms = functions.firestore
   .document('rooms/{roomId}')
   .onUpdate(( change, context ) => {
     const data = change.after.data()
     const previousData = change.before.data()
-
-    console.log(`Data: ${data.players}. Previous data: ${previousData.players}.`)
 
     // If the players havent changed, just quit
     // eslint-disable-next-line
@@ -103,7 +108,7 @@ exports.cleanseRooms = functions.firestore
 
     return getActivePlayers(data.players)
       .then(activePlayers => {
-        console.log(activePlayers)
+        console.log(`#${context.params.roomId}# active player list: ${activePlayers}.`)
 
         if (activePlayers.length === 0) change.after.ref.delete()
         if (activePlayers.length > 0) change.after.ref.set({
@@ -117,10 +122,33 @@ exports.cleanseRooms = functions.firestore
 /**
  * When a user's status changes in the realtime db
  */
+
+async function getOldRoom (user) {
+  return users.doc(user)
+    .get()
+    .then(doc => {
+      return doc.data().room
+    })
+    .catch(e => reject(e))
+}
+
+// This functions returns a janky array. Don't worry about it.
+async function playerFiltered (room, player) {
+  return rooms.doc(room)
+    .get()
+    .then(doc => {
+      let filtered = doc.data().players.filter(p => p !== player)
+      return [
+        filtered,
+        room
+      ]
+    })
+}
+
 exports.userStatusLink = functions.database
   .ref('/status/{userId}')
   .onWrite(( change, context ) => {
-    // If the write is a deletion
+    // If the write is a deletion...
     if (!change.after.exists()) {
       return db.collection('users')
         .doc(context.params.userId)
@@ -130,10 +158,26 @@ exports.userStatusLink = functions.database
           })
     }
 
-    return db.collection('users')
-      .doc(context.params.userId)
-      .set({
-        online: (change.after.val() === 'online'),
-        lastSeen: Math.floor(Date.now()) // Firestore timestamps can eat nutz
-      }, { merge: true })
+    // ... otherwise continue operations.
+    const batch = db.batch()
+
+    return getOldRoom(context.params.userId)
+      .then(oldRoom => {
+        return playerFiltered(oldRoom, context.params.userId)
+      })
+      .then(data => {
+        // data[0] filtered players
+        // data[1] room id
+        if (data[0].length > 1) batch.update(rooms.doc(data[1]), {
+          players: data[0]
+        })
+        if (data[0].length === 0) batch.delete(rooms.doc(data[1]))
+        batch.update(users.doc(context.params.userId), {
+          online: (change.after.val() === 'online'),
+          room: null,
+          lastSeen: Math.floor(Date.now())
+        })
+        return batch.commit()
+      })
+      .catch(e => console.error(e))
   })

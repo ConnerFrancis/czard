@@ -1,7 +1,9 @@
 <template>
   <div class="rooms-list">
-    rooms pls:
-    {{ rooms }}
+    <rooms-create-dialogue ref="dialogue" />
+    <div>
+      <button @click="toggleDialogue">Create room</button>
+    </div>
     <div
       v-for="(room, key) in rooms"
       class="room"
@@ -17,10 +19,16 @@
 
 <script>
 import Vue from 'vue'
-import firebase from 'firebase'
+import auth from '@/auth'
+
+import RoomsCreateDialogue from '@/components/rooms/RoomsCreateDialogue.vue'
 
 export default {
   name: 'RoomsList',
+
+  components: {
+    'rooms-create-dialogue': RoomsCreateDialogue
+  },
 
   data () {
     return {
@@ -29,17 +37,16 @@ export default {
   },
 
   methods: {
-    joinRoom (id, isPlayer) {
-      // Only add to the players if u wanna
-      if (isPlayer) {
-        this.$db.collection('rooms')
-          .doc(id)
-          .update({
-            players: firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid)
-          })
-      }
+    toggleDialogue () {
+      this.$refs.dialogue.toggle()
+    },
 
-      this.$router.push('/room/' + id)
+    joinRoom (room, isPlayer) {
+      // If the player is not a spectator
+      if (isPlayer) this.$api.rooms.joinRoom(auth.currentUser.uid, room).catch(e => this.$store.dispatch('toast/error', e))
+
+      // Always redirect to the room
+      this.$router.push('/room/' + room)
     }
   },
 
