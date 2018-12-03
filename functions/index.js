@@ -127,9 +127,10 @@ async function getOldRoom (user) {
   return users.doc(user)
     .get()
     .then(doc => {
+      console.log('!TEST! ' + doc.id + 'grabbed.')
+      console.log('!TEST! ' + doc.data().room + 'grabbed.')
       return doc.data().room
     })
-    .catch(e => reject(e))
 }
 
 // This functions returns a janky array. Don't worry about it.
@@ -137,11 +138,10 @@ async function playerFiltered (room, player) {
   return rooms.doc(room)
     .get()
     .then(doc => {
-      let filtered = doc.data().players.filter(p => p !== player)
-      return [
-        filtered,
+      return {
+        filtered: doc.data().players.filter(p => p !== player),
         room
-      ]
+      }
     })
 }
 
@@ -150,12 +150,12 @@ exports.userStatusLink = functions.database
   .onWrite(( change, context ) => {
     // If the write is a deletion...
     if (!change.after.exists()) {
-      return db.collection('users')
-        .doc(context.params.userId)
+      return users.doc(context.params.userId)
         .delete()
           .then(() => {
             return admin.auth().deleteUser(context.params.userId)
           })
+          .catch(e => console.error(e))
     }
 
     // ... otherwise continue operations.
@@ -163,18 +163,25 @@ exports.userStatusLink = functions.database
 
     return getOldRoom(context.params.userId)
       .then(oldRoom => {
-        return playerFiltered(oldRoom, context.params.userId)
+        // Filter the players if the user was in a room...
+        if (oldRoom !== null && oldRoom !== undefined) return playerFiltered(oldRoom, context.params.userId)
+        // ...otherwise return blank data.
+        return {
+          filtered: [],
+          room: null
+        }
       })
       .then(data => {
-        // data[0] filtered players
-        // data[1] room id
-        if (data[0].length > 1) batch.update(rooms.doc(data[1]), {
-          players: data[0]
+        // When there are players left
+        if (data.filtered.length > 0) batch.update(rooms.doc(data.room), {
+          players: data.filtered
         })
-        if (data[0].length === 0) batch.delete(rooms.doc(data[1]))
+        // When there are no players left
+        if (data.filtered.length <= 0 && data.room !== null) batch.delete(rooms.doc(data.room))
+        // Update the user
         batch.update(users.doc(context.params.userId), {
           online: (change.after.val() === 'online'),
-          room: null,
+          room: null, // When reconnected, the player should not have a room in the first place anyways.
           lastSeen: Math.floor(Date.now())
         })
         return batch.commit()

@@ -6,18 +6,24 @@ service cloud.firestore {
     // Test if data is filled
     function stringFilled(s) {
       return s.split('').join('') != ''
-             && s.split('').join('') != null;
+          && s.split('').join('') != null;
     }
     function arrayFilled(a) {
       return a.size() > 0
-             && a != null
-             && a != [];
+          && a != null
+          && a != [];
     }
 
     ///////////
     // Rooms //
     ///////////
     match /rooms/{room} {
+      // If the user's room is null or the same room
+      function userRoomStatusIsValid(req, r) {
+        return get(/database/$(database)/documents/users/$(u)).data.room == null
+            || get(/database/$(database)/documents/users/$(u)).data.room == r;
+      }
+
       allow read: if auth();
       // Update cases:
       allow update: if auth()
@@ -25,7 +31,8 @@ service cloud.firestore {
                     && request.resource.data.title.size() <= 100 // Max title of 100 characters
                     && request.resource.data.owner == resource.data.owner // Owner hasn't changed
                     && request.resource.data.title == resource.data.title // Title hasn't changed
-                    && request.resource.data.decks == resource.data.decks; // Decks haven't changed
+                    && request.resource.data.decks == resource.data.decks // Decks haven't changed
+                    && userRoomStatusIsValid(request.auth.uid, room); // User is in the same room or not in a room
       allow create: if auth()
                     && stringFilled(request.resource.data.title) // Title exists
                     && arrayFilled(request.resource.data.decks) // Decks are chosen
@@ -38,8 +45,16 @@ service cloud.firestore {
     // Users //
     ///////////
     match /users/{user} {
+      // If the user is an admin or is the same user
+      function userIsAdminOrSame() {
+        return resource.data.admin == true
+            || request.auth.uid == user;
+      }
+
       allow read: if auth();
       allow write: if request.auth.uid == user;
+                   // if userIsAdminOrSame() // User is an admin or the same user
+                   // && request.resource.data.admin == resource.data.admin; // Admin status has not changed
     }
   }
 }

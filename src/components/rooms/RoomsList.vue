@@ -9,10 +9,10 @@
       class="room"
       :key="key"
     >
-      <span class="name">{{ room.name }}</span>
+      <span class="title">{{ room.title }}</span>
       <span class="players">{{ room.players.length }} <template v-if="room.players.length == 1">player</template><template v-else>players</template></span>
       <button @click="joinRoom(key, true)">Join</button>
-    <button @click="joinRoom(key, false)">Spectate</button>
+      <button @click="joinRoom(key, false)">Spectate</button>
     </div>
   </div>
 </template>
@@ -32,7 +32,8 @@ export default {
 
   data () {
     return {
-      rooms: {}
+      rooms: {},
+      user: {}
     }
   },
 

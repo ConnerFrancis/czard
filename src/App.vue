@@ -1,19 +1,21 @@
 <template>
   <div id="app">
-    uhm view pls:
     <router-view />
+    <current-user-modal />
     <toast />
   </div>
 </template>
 
 <script>
 import Toast from '@/components/Toast.vue'
+import CurrentUserModal from '@/components/currentUser/CurrentUserModal.vue'
 
 export default {
   name: 'App',
 
   components: {
-    toast: Toast
+    toast: Toast,
+    'current-user-modal': CurrentUserModal
   }
 }
 </script>

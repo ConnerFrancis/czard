@@ -8,7 +8,7 @@
     >
       <span v-if="value.type" class="type"></span>
       <span v-if="value.code" class="code">{{ value.code }}</span>
-      <span class="message" v-if="value.html" v-html="value.message"></span>
+      <span class="message" v-if="value.rawHtml" v-html="value.message"></span>
       <span class="message" v-else>{{ value.message }}</span>
     </div>
   </div>
