@@ -16,6 +16,11 @@ const state = {
 }
 
 const mutations = {
+  /**
+   * Pushes a new toast onto toasts.
+   *
+   * @param {Object} payload - Validly formatted toast, see actions.add() for information.
+   */
   [ADD] (state, payload) {
     if (payload.message == null) {
       throw new OperationError('Message given is invalid or does not exist.', 'toast/add/invalid-message')
@@ -24,11 +29,21 @@ const mutations = {
     state.lastId += 1
   },
 
+  /**
+   * Pushes a toast onto deprecated and removes from toasts.
+   *
+   * @param {string} id - ID number of the toast to deprecate.
+   */
   [DEPRECATE] (state, id) {
     Vue.set(state.deprecated, id, state.toasts[id])
     Vue.delete(state.toasts, id)
   },
 
+  /**
+   * Removes a toast completely from both lists.
+   *
+   * @param {string} id - ID number of the toast to remove.
+   */
   [REMOVE] (state, id) {
     Vue.delete(state.toasts, id)
     Vue.delete(state.deprecated, id)

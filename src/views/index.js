@@ -10,7 +10,7 @@ import Room from '@/views/Room'
 
 import Users from '@/views/Users'
 
-// Views all listed in @/views
+/** This holds all base roots. */
 const root = [
   {
     path: '/',
@@ -29,6 +29,6 @@ const root = [
   }
 ]
 
-// Gather the views
+/** Gather the different sub collections of views here with .concat. */
 export default []
   .concat(root)

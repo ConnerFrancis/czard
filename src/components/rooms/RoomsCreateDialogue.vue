@@ -9,8 +9,6 @@
 </template>
 
 <script>
-import auth from '@/auth'
-
 export default {
   name: 'RoomsCreateDialogue',
 
@@ -19,17 +17,19 @@ export default {
       show: false,
 
       title: null,
+      /** TODO: Provide support for changing the decks. */
       decks: ['default']
     }
   },
 
   methods: {
+    /** Show and hide this dialogue, called in components/rooms/RoomsList. */
     toggle () {
       this.show = !this.show
     },
 
     submit () {
-      this.$api.rooms.createRoom(this.title, this.decks, auth.currentUser.uid)
+      this.$api.rooms.createRoom(this.title, this.decks)
         .then(id => {
           this.$store.dispatch('toast/add', {
             type: 'info',
@@ -37,7 +37,6 @@ export default {
           })
           this.$router.push('/room/' + id)
         })
-        .catch(e => this.$store.dispatch('toast/error', e))
     }
   }
 }
